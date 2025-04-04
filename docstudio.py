@@ -2,7 +2,6 @@ import streamlit as st
 import markdown
 from pygments.formatters import HtmlFormatter
 from PIL import Image
-import imgkit
 import pdfkit
 import zipfile
 from io import BytesIO
@@ -108,86 +107,12 @@ if markdown_content:
             'disable-smart-shrinking': '',
             'enable-local-file-access': ''
         }
-        config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
-        pdf_bytes = pdfkit.from_string(full_html, False, configuration=config)
-
+        pdf_bytes = pdfkit.from_string(full_html, False, options=pdf_options)
 
         with col2:
             st.download_button("📄 Download High-Quality PDF", data=pdf_bytes, file_name="doc.pdf", mime="application/pdf")
     except Exception as e:
         st.warning(f"⚠️ PDF export failed: {e}")
-
-    # --- High-Quality Image Export ---
-    # --- High-Quality Image Export (Using Selenium) ---
-try:
-    from selenium import webdriver
-    from selenium.webdriver.chrome.options import Options
-    from PIL import Image
-    from io import BytesIO
-
-    # Set up headless browser
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1200x800")
-
-    driver = webdriver.Chrome(options=options)
-    driver.get(f"data:text/html;charset=utf-8,{full_html}")
-
-    # Take a screenshot
-    screenshot = driver.get_screenshot_as_png()
-    driver.quit()
-
-    # Convert to image
-    image = Image.open(BytesIO(screenshot))
-
-    # Save image as BytesIO
-    image_buffer = BytesIO()
-    image.save(image_buffer, format="PNG")
-    image_bytes = image_buffer.getvalue()
-
-    with col3:
-        st.download_button("🖼️ Download High-Quality PNG", data=image_bytes, file_name="doc.png", mime="image/png")
-except Exception as e:
-    st.warning(f"⚠️ Image export failed: {e}")
-
-    full_html = ""  # Ensure it's always defined
-
-if markdown_content:
-    html_content = markdown.markdown(
-        markdown_content,
-        extensions=["fenced_code", "codehilite"]
-    )
-
-    code_css = HtmlFormatter(style="monokai").get_style_defs('.codehilite')
-    full_html = f"""
-    <html>
-    <head>
-        <style>
-            body {{ font-family: 'Segoe UI', sans-serif; padding: 20px; }}
-            {code_css}
-            pre {{ border-radius: 8px; padding: 12px; overflow-x: auto; }}
-        </style>
-    </head>
-    <body>{html_content}</body>
-    </html>
-    """
-
-# Ensure full_html exists before using it in ZIP
-if full_html.strip():
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        zip_file.writestr("doc.md", markdown_content)
-        zip_file.writestr("doc.html", full_html)
-        if 'pdf_bytes' in locals():
-            zip_file.writestr("doc.pdf", pdf_bytes)
-        if 'image_bytes' in locals():
-            zip_file.writestr("doc.png", image_bytes)
-
-    st.download_button("📦 Download All (ZIP)", data=zip_buffer.getvalue(), file_name="docstudio_exports.zip", mime="application/zip")
-else:
-    st.warning("⚠️ No valid content to export. Please enter Markdown first.")
-
 
     # --- ZIP File Download ---
     zip_buffer = BytesIO()
@@ -196,8 +121,6 @@ else:
         zip_file.writestr("doc.html", full_html)
         if 'pdf_bytes' in locals():
             zip_file.writestr("doc.pdf", pdf_bytes)
-        if 'image_bytes' in locals():
-            zip_file.writestr("doc.png", image_bytes)
 
     with col4:
         st.download_button("📦 Download All (ZIP)", data=zip_buffer.getvalue(), file_name="docstudio_exports.zip", mime="application/zip")
