@@ -151,6 +151,43 @@ try:
 except Exception as e:
     st.warning(f"⚠️ Image export failed: {e}")
 
+    full_html = ""  # Ensure it's always defined
+
+if markdown_content:
+    html_content = markdown.markdown(
+        markdown_content,
+        extensions=["fenced_code", "codehilite"]
+    )
+
+    code_css = HtmlFormatter(style="monokai").get_style_defs('.codehilite')
+    full_html = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: 'Segoe UI', sans-serif; padding: 20px; }}
+            {code_css}
+            pre {{ border-radius: 8px; padding: 12px; overflow-x: auto; }}
+        </style>
+    </head>
+    <body>{html_content}</body>
+    </html>
+    """
+
+# Ensure full_html exists before using it in ZIP
+if full_html.strip():
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+        zip_file.writestr("doc.md", markdown_content)
+        zip_file.writestr("doc.html", full_html)
+        if 'pdf_bytes' in locals():
+            zip_file.writestr("doc.pdf", pdf_bytes)
+        if 'image_bytes' in locals():
+            zip_file.writestr("doc.png", image_bytes)
+
+    st.download_button("📦 Download All (ZIP)", data=zip_buffer.getvalue(), file_name="docstudio_exports.zip", mime="application/zip")
+else:
+    st.warning("⚠️ No valid content to export. Please enter Markdown first.")
+
 
     # --- ZIP File Download ---
     zip_buffer = BytesIO()
