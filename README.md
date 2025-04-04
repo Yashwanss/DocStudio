@@ -82,6 +82,14 @@ Pull requests are welcome! Fork the repo, make your changes, and submit a PR. Le
 
 ---
 
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+## License
+
+This project is licensed under the [MIT License](LICENSE).  
+You are free to use, modify, and distribute this software with attribution.
+
+---
+
 - 🌍 Connect with Us
 - 📧 Email: yashwanth22194@gmail.com
 - 🔗 GitHub Repo: (github.com/Yashwanss)
