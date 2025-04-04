@@ -1,7 +1,3 @@
-Here's your README file for GitHub:  
-
----
-
 # 📄 DocStudio by WIKI  
 
 ### 🚀 Live Demo: [DocStudioByWIKI](https://docstudio-bywiki.streamlit.app/) 
