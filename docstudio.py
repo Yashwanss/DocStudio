@@ -108,7 +108,7 @@ if markdown_content:
             'disable-smart-shrinking': '',
             'enable-local-file-access': ''
         }
-        config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+        config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
         pdf_bytes = pdfkit.from_string(full_html, False, configuration=config)
 
 
