@@ -13,19 +13,19 @@ from io import BytesIO
 st.set_page_config(page_title="DocStudio by WIKI", layout="wide")
 st.markdown("<style>body { font-family: 'Segoe UI', sans-serif; }</style>", unsafe_allow_html=True)
 
-# --- Password Protection ---
-PASSWORD = st.secrets.get("app_password", "docstudio123")  # fallback for local testing
+# # --- Password Protection ---
+# PASSWORD = st.secrets.get("app_password", "docstudio123")  # fallback for local testing
 
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
+# if "authenticated" not in st.session_state:
+#     st.session_state.authenticated = False
 
-if not st.session_state.authenticated:
-    password_input = st.text_input("🔐 Enter password to access DocStudio:", type="password")
-    if password_input == PASSWORD:
-        st.session_state.authenticated = True
-        st.rerun()
-    else:
-        st.stop()
+# if not st.session_state.authenticated:
+#     password_input = st.text_input("🔐 Enter password to access DocStudio:", type="password")
+#     if password_input == PASSWORD:
+#         st.session_state.authenticated = True
+#         st.rerun()
+#     else:
+#         st.stop()
 
 # --- Branding ---
 st.title("📄 DocStudio by WIKI")
