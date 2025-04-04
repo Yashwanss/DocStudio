@@ -10,10 +10,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- App Configuration ---
+# config
 st.set_page_config(page_title="DocStudio by WIKI", layout="wide")
 
-# --- 🎨 UI Improvements ---
 st.markdown("""
     <style>
     body { font-family: 'Segoe UI', sans-serif; }
@@ -26,11 +25,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 🔹 Welcome Message ---
 st.markdown("<h1 class='big-title'>📄 DocStudio by WIKI</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>Easily edit, preview, and export Markdown & images with high-quality exports.</p>", unsafe_allow_html=True)
 
-# --- 📥 Upload / Paste Markdown ---
 st.markdown("### 📥 **Upload or Paste Markdown**")
 
 uploaded_file = st.file_uploader("**Drag & drop a file (.md, .png, .jpg)**", type=["md", "markdown", "png", "jpg", "jpeg"])
@@ -43,7 +40,6 @@ st.session_state.markdown_text = pasted_text
 
 markdown_content = ""
 
-# Handle uploaded file
 if uploaded_file:
     if uploaded_file.name.endswith((".md", ".markdown")):
         markdown_content = uploaded_file.read().decode("utf-8")
@@ -55,7 +51,6 @@ if uploaded_file:
 if st.session_state.markdown_text:
     markdown_content = st.session_state.markdown_text
 
-# --- 🔍 Live Preview ---
 if markdown_content:
     st.markdown("### 🔍 **Live Markdown Preview**")
 
@@ -81,7 +76,7 @@ if markdown_content:
     st.markdown(f"<style>{code_css}</style>", unsafe_allow_html=True)
     st.markdown(html_content, unsafe_allow_html=True)
 
-    # --- 📤 Export Options ---
+    # Export Options
     st.markdown("### 📤 **Export Your Markdown**")
     st.markdown("Choose a format to download your document.")
 
@@ -90,7 +85,7 @@ if markdown_content:
     with col1:
         st.download_button("⬇️ Download HTML", full_html, file_name="doc.html", mime="text/html")
 
-    # --- High-Quality PDF Export ---
+    # PDF Export 
     try:
         pdf_options = {
             'page-size': 'A4',
@@ -105,7 +100,7 @@ if markdown_content:
     except Exception as e:
         st.warning(f"⚠️ PDF export failed: {e}")
 
-    # --- Image Export Using Selenium ---
+    #Image Export
     def export_image(html):
         """Generates a PNG image of the rendered HTML using Selenium."""
         chrome_options = Options()
@@ -131,7 +126,7 @@ if markdown_content:
             image_data = export_image(full_html)
             st.download_button("🖼️ Download PNG", data=image_data, file_name="export.png", mime="image/png")
 
-    # --- ZIP File Download ---
+    #ZIP File Download
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         zip_file.writestr("doc.md", markdown_content)
