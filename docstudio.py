@@ -118,18 +118,39 @@ if markdown_content:
         st.warning(f"⚠️ PDF export failed: {e}")
 
     # --- High-Quality Image Export ---
-    try:
-        image_options = {
-            'format': 'png',
-            'quality': 100,
-            'width': 1200
-        }
-        image_bytes = imgkit.from_string(full_html, False, options=image_options)
+    # --- High-Quality Image Export (Using Selenium) ---
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from PIL import Image
+    from io import BytesIO
 
-        with col3:
-            st.download_button("🖼️ Download High-Quality PNG", data=image_bytes, file_name="doc.png", mime="image/png")
-    except Exception as e:
-        st.warning(f"⚠️ Image export failed: {e}")
+    # Set up headless browser
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1200x800")
+
+    driver = webdriver.Chrome(options=options)
+    driver.get(f"data:text/html;charset=utf-8,{full_html}")
+
+    # Take a screenshot
+    screenshot = driver.get_screenshot_as_png()
+    driver.quit()
+
+    # Convert to image
+    image = Image.open(BytesIO(screenshot))
+
+    # Save image as BytesIO
+    image_buffer = BytesIO()
+    image.save(image_buffer, format="PNG")
+    image_bytes = image_buffer.getvalue()
+
+    with col3:
+        st.download_button("🖼️ Download High-Quality PNG", data=image_bytes, file_name="doc.png", mime="image/png")
+except Exception as e:
+    st.warning(f"⚠️ Image export failed: {e}")
+
 
     # --- ZIP File Download ---
     zip_buffer = BytesIO()
