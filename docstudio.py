@@ -9,44 +9,36 @@ from io import BytesIO
 
 # --- App Configuration ---
 st.set_page_config(page_title="DocStudio by WIKI", layout="wide")
-st.markdown("<style>body { font-family: 'Segoe UI', sans-serif; }</style>", unsafe_allow_html=True)
 
 # --- 🎨 UI Improvements ---
 st.markdown("""
     <style>
-    .big-title { font-size: 2rem; font-weight: bold; }
-    .sub-title { font-size: 1.2rem; color: #666; margin-bottom: 20px; }
-    .upload-box { border: 2px dashed #bbb; padding: 15px; border-radius: 10px; }
-    .stButton>button { width: 100%; }
+    body { font-family: 'Segoe UI', sans-serif; }
+    .big-title { font-size: 2rem; font-weight: bold; color: #1E88E5; }
+    .sub-title { font-size: 1.2rem; color: #555; margin-bottom: 20px; }
+    .upload-box { border: 2px dashed #1E88E5; padding: 15px; border-radius: 10px; background-color: #f9f9f9; }
+    .stButton>button { width: 100%; font-size: 16px; padding: 10px; background-color: #1E88E5; color: white; border-radius: 5px; }
+    .stButton>button:hover { background-color: #1565C0; }
+    .stDownloadButton>button { background-color: #43A047; color: white; }
+    .stDownloadButton>button:hover { background-color: #388E3C; }
     </style>
 """, unsafe_allow_html=True)
 
 # --- 🔹 Welcome Message ---
 st.markdown("<h1 class='big-title'>📄 DocStudio by WIKI</h1>", unsafe_allow_html=True)
-st.markdown("<p class='sub-title'>Easily edit, preview, and export Markdown & images with syntax highlighting.</p>", unsafe_allow_html=True)
+st.markdown("<p class='sub-title'>Easily edit, preview, and export Markdown & images with high-quality exports.</p>", unsafe_allow_html=True)
 
 st.markdown("### 🌟 **What Can This App Do?**")
 st.info("""
 - 📄 **Write or upload Markdown files** (.md) to see a **live preview**.
 - 🖼️ **Upload images** (PNG, JPG) to view them directly.
 - 🎨 **Syntax highlighting** for code blocks.
-- 🌗 **Switch between light & dark themes**.
 - 📤 **Export your Markdown as**:
     - 📝 HTML file
-    - 📄 PDF file
-    - 🖼️ Image (PNG)
+    - 📄 High-Quality PDF file
+    - 🖼️ High-Quality Image (PNG)
     - 📦 ZIP file (containing all exports)
 """)
-
-# --- 🌗 Theme Selector ---
-theme = st.sidebar.radio("🎨 Theme", ["Light", "Dark"])
-if theme == "Dark":
-    st.markdown("""
-        <style>
-        body { background-color: #1e1e1e; color: white; }
-        textarea, .stTextInput > div > div { background-color: #2e2e2e !important; color: white; }
-        </style>
-    """, unsafe_allow_html=True)
 
 # --- 📥 Upload / Paste Markdown ---
 st.markdown("### 📥 **Upload or Paste Markdown**")
@@ -108,20 +100,36 @@ if markdown_content:
     with col1:
         st.download_button("⬇️ Download HTML", full_html, file_name="doc.html", mime="text/html")
 
+    # --- High-Quality PDF Export ---
     try:
-        pdf_bytes = pdfkit.from_string(full_html, False)
+        pdf_options = {
+            'page-size': 'A4',
+            'dpi': 300,
+            'disable-smart-shrinking': '',
+            'enable-local-file-access': ''
+        }
+        pdf_bytes = pdfkit.from_string(full_html, False, options=pdf_options)
+
         with col2:
-            st.download_button("📄 Download PDF", data=pdf_bytes, file_name="doc.pdf", mime="application/pdf")
-    except:
-        st.warning("⚠️ PDF export failed. Ensure wkhtmltopdf is installed.")
+            st.download_button("📄 Download High-Quality PDF", data=pdf_bytes, file_name="doc.pdf", mime="application/pdf")
+    except Exception as e:
+        st.warning(f"⚠️ PDF export failed: {e}")
 
+    # --- High-Quality Image Export ---
     try:
-        image_bytes = imgkit.from_string(full_html, False, options={"format": "png"})
-        with col3:
-            st.download_button("🖼️ Download PNG", data=image_bytes, file_name="doc.png", mime="image/png")
-    except:
-        st.warning("⚠️ Image export failed.")
+        image_options = {
+            'format': 'png',
+            'quality': 100,
+            'width': 1200
+        }
+        image_bytes = imgkit.from_string(full_html, False, options=image_options)
 
+        with col3:
+            st.download_button("🖼️ Download High-Quality PNG", data=image_bytes, file_name="doc.png", mime="image/png")
+    except Exception as e:
+        st.warning(f"⚠️ Image export failed: {e}")
+
+    # --- ZIP File Download ---
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         zip_file.writestr("doc.md", markdown_content)
