@@ -5,6 +5,10 @@ from PIL import Image
 import pdfkit
 import zipfile
 from io import BytesIO
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 # --- App Configuration ---
 st.set_page_config(page_title="DocStudio by WIKI", layout="wide")
@@ -15,7 +19,6 @@ st.markdown("""
     body { font-family: 'Segoe UI', sans-serif; }
     .big-title { font-size: 2rem; font-weight: bold; color: #1E88E5; }
     .sub-title { font-size: 1.2rem; color: #555; margin-bottom: 20px; }
-    .upload-box { border: 2px dashed #1E88E5; padding: 15px; border-radius: 10px; background-color: #f9f9f9; }
     .stButton>button { width: 100%; font-size: 16px; padding: 10px; background-color: #1E88E5; color: white; border-radius: 5px; }
     .stButton>button:hover { background-color: #1565C0; }
     .stDownloadButton>button { background-color: #43A047; color: white; }
@@ -26,18 +29,6 @@ st.markdown("""
 # --- 🔹 Welcome Message ---
 st.markdown("<h1 class='big-title'>📄 DocStudio by WIKI</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>Easily edit, preview, and export Markdown & images with high-quality exports.</p>", unsafe_allow_html=True)
-
-st.markdown("### 🌟 **What Can This App Do?**")
-st.info("""
-- 📄 **Write or upload Markdown files** (.md) to see a **live preview**.
-- 🖼️ **Upload images** (PNG, JPG) to view them directly.
-- 🎨 **Syntax highlighting** for code blocks.
-- 📤 **Export your Markdown as**:
-    - 📝 HTML file
-    - 📄 High-Quality PDF file
-    - 🖼️ High-Quality Image (PNG)
-    - 📦 ZIP file (containing all exports)
-""")
 
 # --- 📥 Upload / Paste Markdown ---
 st.markdown("### 📥 **Upload or Paste Markdown**")
@@ -94,7 +85,7 @@ if markdown_content:
     st.markdown("### 📤 **Export Your Markdown**")
     st.markdown("Choose a format to download your document.")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
         st.download_button("⬇️ Download HTML", full_html, file_name="doc.html", mime="text/html")
@@ -113,6 +104,32 @@ if markdown_content:
             st.download_button("📄 Download High-Quality PDF", data=pdf_bytes, file_name="doc.pdf", mime="application/pdf")
     except Exception as e:
         st.warning(f"⚠️ PDF export failed: {e}")
+
+    # --- Image Export Using Selenium ---
+    def export_image(html):
+        """Generates a PNG image of the rendered HTML using Selenium."""
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1200x800")
+
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        driver.get(f"data:text/html;charset=utf-8,{html}")
+
+        screenshot = driver.get_screenshot_as_png()
+        driver.quit()
+
+        image = Image.open(BytesIO(screenshot))
+        image_buffer = BytesIO()
+        image.save(image_buffer, format="PNG")
+
+        return image_buffer.getvalue()
+
+    with col3:
+        if st.button("🖼️ Download as Image"):
+            image_data = export_image(full_html)
+            st.download_button("🖼️ Download PNG", data=image_data, file_name="export.png", mime="image/png")
 
     # --- ZIP File Download ---
     zip_buffer = BytesIO()
