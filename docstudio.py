@@ -108,7 +108,9 @@ if markdown_content:
             'disable-smart-shrinking': '',
             'enable-local-file-access': ''
         }
-        pdf_bytes = pdfkit.from_string(full_html, False, options=pdf_options)
+        config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+        pdf_bytes = pdfkit.from_string(full_html, False, configuration=config)
+
 
         with col2:
             st.download_button("📄 Download High-Quality PDF", data=pdf_bytes, file_name="doc.pdf", mime="application/pdf")
